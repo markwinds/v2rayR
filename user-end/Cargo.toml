@@ -1,5 +1,5 @@
 [package]
-name = "user-end"
+name = "v2ray_r"
 version = "0.1.0"
 edition = "2021"
 
@@ -7,3 +7,7 @@ edition = "2021"
 
 [dependencies]
 actix-web = "4"
+futures = "*"
+futures-util = "0.3.30"
+rust-embed="8.4.0"
+mime_guess = "2.0.4"
