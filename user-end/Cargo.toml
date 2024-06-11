@@ -7,13 +7,19 @@ edition = "2021"
 
 [dependencies]
 actix-web = "4"
-futures = "*"
 futures-util = "0.3.30"
-rust-embed="8.4.0"
+rust-embed = "8.4.0"
 mime_guess = "2.0.4"
+log = "0.4"
+env_logger = "0.9"
+futures = "0.3.30"
+once_cell = "1.19.0"
+termcolor = "1.4.1"
+flate2 = "1.0.30"
+chrono = "0.4.38"
 
 [profile.release]
-lto = true # 开启链接时优化 可以减小二进制体积并加快运行速度
+lto = true        # 开启链接时优化 可以减小二进制体积并加快运行速度
 strip = "symbols" # 使用strip剥离调试信息和符号信息
-panic = "abort" # 不保留崩溃时的堆栈信息
+panic = "abort"   # 不保留崩溃时的堆栈信息
 # codegen-units = 1 # 切分编译 效果不明显
