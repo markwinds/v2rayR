@@ -11,3 +11,9 @@ futures = "*"
 futures-util = "0.3.30"
 rust-embed="8.4.0"
 mime_guess = "2.0.4"
+
+[profile.release]
+lto = true # 开启链接时优化 可以减小二进制体积并加快运行速度
+strip = "symbols" # 使用strip剥离调试信息和符号信息
+panic = "abort" # 不保留崩溃时的堆栈信息
+# codegen-units = 1 # 切分编译 效果不明显
