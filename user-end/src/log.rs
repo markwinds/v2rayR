@@ -7,6 +7,7 @@ use std::sync::{Arc, Mutex};
 use flate2::Compression;
 use flate2::write::GzEncoder;
 use once_cell::sync::Lazy;
+use serde::{Deserialize, Serialize};
 use termcolor::{Color, ColorChoice, ColorSpec, StandardStream, WriteColor};
 
 use crate::utils::{get_time_s_dir, get_time_str_ms};
@@ -58,12 +59,12 @@ macro_rules! set_log_level {
     }};
 }
 
-#[derive(Debug, PartialEq, PartialOrd)]
+#[derive(Debug, PartialEq, PartialOrd, Clone, Copy, Serialize, Deserialize)]
 pub enum LogLevel {
-    ErrorLevel,
-    WarningLevel,
-    InfoLevel,
     DebugLevel,
+    InfoLevel,
+    WarningLevel,
+    ErrorLevel,
 }
 
 pub struct Logger {
@@ -99,7 +100,7 @@ impl Logger {
     }
 
     pub fn log(&mut self, level: LogLevel, args: Arguments, file: &str, line: u32) {
-        if level <= self.level {
+        if level >= self.level {
             let level_str = match level {
                 LogLevel::DebugLevel => "D",
                 LogLevel::InfoLevel => "I",

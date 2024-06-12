@@ -8,6 +8,7 @@ use actix_web::{App, HttpServer};
 use log::{Logger, LogLevel};
 use middleware::req_time::ReqTime;
 
+use crate::config::Config;
 // use crate::config::Config;
 use crate::web_dist::{dist, index};
 
@@ -21,13 +22,17 @@ mod config;
 async fn main() -> std::io::Result<()> {
     set_log_level!(LogLevel::WarningLevel);
 
-    // let a = Logger::instance().lock().unwrap();
-    // drop(a);
+    {
+        let config_ins = Config::instance();
+        let config = config_ins.lock().unwrap();
+        println!("read config{:?}", config);
+        set_log_level!(config.log_config.level)
+    }
 
-    // let config = Config::instance();
-
-    log_e!("Formatted message: number = {}, string = {}", 42, "hello");
-    log_i!("good");
+    log_d!("debug");
+    log_i!("info");
+    log_w!("warn");
+    log_e!("error");
 
     HttpServer::new(|| App::new().wrap(ReqTime).service(index).service(dist))
         .bind("0.0.0.0:3333")?

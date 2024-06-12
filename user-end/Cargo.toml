@@ -3,12 +3,12 @@ name = "v2ray_r"
 version = "0.1.0"
 edition = "2021"
 
-# 这里的 `default-run` 字段设置了默认运行的二进制文件名
-default-run = "v2rayR"
-
-[[bin]]
-name = "v2rayR"
-path = "src/main.rs"
+## 这里的 `default-run` 字段设置了默认运行的二进制文件名
+#default-run = "v2rayR"
+#
+#[[bin]]
+#name = "v2rayR"
+#path = "src/main.rs"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
