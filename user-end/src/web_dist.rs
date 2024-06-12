@@ -1,4 +1,4 @@
-use actix_web::{web, HttpResponse, Responder};
+use actix_web::{HttpResponse, Responder, web};
 use mime_guess::from_path;
 use rust_embed::Embed;
 
@@ -19,12 +19,12 @@ fn handle_embedded_file(path: &str) -> HttpResponse {
 
 // 重定向请求“/”到index.html文件
 #[actix_web::get("/")]
-async fn index() -> impl Responder {
+pub(crate) async fn index() -> impl Responder {
     handle_embedded_file("index.html")
 }
 
 // 静态文件请求url路径以web开头，需要和vite.config.js中的base配置匹配
 #[actix_web::get("/web/{_:.*}")]
-async fn dist(path: web::Path<String>) -> impl Responder {
+pub(crate) async fn dist(path: web::Path<String>) -> impl Responder {
     handle_embedded_file(path.as_str())
 }

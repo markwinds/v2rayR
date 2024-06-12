@@ -3,6 +3,13 @@ name = "v2ray_r"
 version = "0.1.0"
 edition = "2021"
 
+# 这里的 `default-run` 字段设置了默认运行的二进制文件名
+default-run = "v2rayR"
+
+[[bin]]
+name = "v2rayR"
+path = "src/main.rs"
+
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
@@ -11,12 +18,14 @@ futures-util = "0.3.30"
 rust-embed = "8.4.0"
 mime_guess = "2.0.4"
 log = "0.4"
-env_logger = "0.9"
+env_logger = "0.11.3"
 futures = "0.3.30"
 once_cell = "1.19.0"
 termcolor = "1.4.1"
 flate2 = "1.0.30"
 chrono = "0.4.38"
+toml = "0.8.14"
+serde = { version = "1.0.203", features = ["derive"] }
 
 [profile.release]
 lto = true        # 开启链接时优化 可以减小二进制体积并加快运行速度

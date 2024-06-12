@@ -1,16 +1,16 @@
-use flate2::write::GzEncoder;
-use flate2::Compression;
-use once_cell::sync::Lazy;
 use std::fmt::Arguments;
 use std::fs::{File, OpenOptions};
 use std::io::{self, BufWriter, Write};
 use std::path::Path;
 use std::sync::{Arc, Mutex};
+
+use flate2::Compression;
+use flate2::write::GzEncoder;
+use once_cell::sync::Lazy;
 use termcolor::{Color, ColorChoice, ColorSpec, StandardStream, WriteColor};
 
 use crate::utils::{get_time_s_dir, get_time_str_ms};
 
-// 增加日志等级
 // 读取配置
 
 const LOG_FILENAME: &str = "v2rayR.log";
@@ -18,7 +18,7 @@ const MAX_LOG_FILESIZE: u64 = 10 * 1024 * 1024;
 
 // 需要使用macro_export导出宏 才能在其他模块使用
 #[macro_export]
-macro_rules! logD {
+macro_rules! log_d {
     ($($arg:tt)*) => {{
         let file = std::file!();
         let line = std::line!();
@@ -27,7 +27,7 @@ macro_rules! logD {
 }
 
 #[macro_export]
-macro_rules! logI {
+macro_rules! log_i {
     ($($arg:tt)*) => {{
         let file = std::file!();
         let line = std::line!();
@@ -36,7 +36,7 @@ macro_rules! logI {
 }
 
 #[macro_export]
-macro_rules! logW {
+macro_rules! log_w {
     ($($arg:tt)*) => {{
         let file = std::file!();
         let line = std::line!();
@@ -45,7 +45,7 @@ macro_rules! logW {
 }
 
 #[macro_export]
-macro_rules! logE {
+macro_rules! log_e {
     ($($arg:tt)*) => {{
         let file = std::file!();
         let line = std::line!();
