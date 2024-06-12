@@ -11,8 +11,6 @@ use termcolor::{Color, ColorChoice, ColorSpec, StandardStream, WriteColor};
 
 use crate::utils::{get_time_s_dir, get_time_str_ms};
 
-// 读取配置
-
 const LOG_FILENAME: &str = "v2rayR.log";
 const MAX_LOG_FILESIZE: u64 = 10 * 1024 * 1024;
 
@@ -69,7 +67,7 @@ pub enum LogLevel {
 }
 
 pub struct Logger {
-    file: Mutex<io::BufWriter<std::fs::File>>,
+    file: BufWriter<File>,
     level: LogLevel,
 }
 
@@ -80,9 +78,9 @@ impl Logger {
             .write(true)
             .append(true)
             .open(file_path)?;
-        let buf_writer = io::BufWriter::new(file);
+        let buf_writer = BufWriter::new(file);
         Ok(Logger {
-            file: Mutex::new(buf_writer),
+            file: buf_writer,
             level,
         })
     }
@@ -100,7 +98,7 @@ impl Logger {
         self.level = level;
     }
 
-    pub fn log(&self, level: LogLevel, args: Arguments, file: &str, line: u32) {
+    pub fn log(&mut self, level: LogLevel, args: Arguments, file: &str, line: u32) {
         if level <= self.level {
             let level_str = match level {
                 LogLevel::DebugLevel => "D",
@@ -116,13 +114,12 @@ impl Logger {
                 LogLevel::ErrorLevel => Color::Red,
             };
 
-            let mut file_writer = self.file.lock().unwrap();
             // Check file size
-            if let Ok(metadata) = file_writer.get_ref().metadata() {
+            if let Ok(metadata) = self.file.get_ref().metadata() {
                 if metadata.len() > MAX_LOG_FILESIZE {
                     let log_file = LOG_FILENAME;
                     let archive_file = get_time_s_dir() + ".gz";
-                    file_writer.flush().unwrap();
+                    self.file.flush().unwrap();
                     let input = File::open(log_file).unwrap();
                     let output = File::create(archive_file).unwrap();
                     let mut encoder = GzEncoder::new(output, Compression::default());
@@ -143,7 +140,7 @@ impl Logger {
                         .append(true)
                         .open(log_file)
                         .unwrap();
-                    *file_writer = BufWriter::new(file);
+                    self.file = BufWriter::new(file);
                 }
             }
 
@@ -155,8 +152,8 @@ impl Logger {
                 line,
                 args
             );
-            let _ = writeln!(file_writer, "{}", log_str);
-            let _ = file_writer.flush();
+            let _ = writeln!(self.file, "{}", log_str);
+            let _ = self.file.flush();
             let mut stdout = StandardStream::stdout(ColorChoice::Always);
             let _ = stdout.set_color(ColorSpec::new().set_fg(Some(output_color)).set_bold(true));
             let _ = writeln!(&mut stdout, "{}", log_str);
