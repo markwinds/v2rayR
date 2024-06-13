@@ -7,6 +7,15 @@ use rust_embed::Embed;
 #[folder = "../web/dist/"]
 struct Asset;
 
+// pub fn get_program_icon() {
+//     match Asset::get("favicon.ico") {
+//         Some(content) => {
+//             content.data.into_owned();
+//         }
+//         None => {}
+//     }
+// }
+
 // 处理静态文件请求 返回对应的文件
 fn handle_embedded_file(path: &str) -> HttpResponse {
     match Asset::get(path) {
