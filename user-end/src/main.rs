@@ -6,6 +6,9 @@
 // 使用data目录
 // github ci配置
 
+// 发布不同平台   tag
+// 给exe签名
+
 // 写在main.rs的第一行 指示编译器生成GUI程序而不是console程序 这样编译出来的windows程序就不会弹出黑框
 #![windows_subsystem = "windows"]
 

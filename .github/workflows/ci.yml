@@ -1,3 +1,5 @@
+
+
 name: CI
 
 on:
@@ -6,6 +8,7 @@ on:
   pull_request:
     branches: [ main ]
 
+# jobs中每个job都是独立的一个虚拟环境，jobs之间是并行运行的
 jobs:
 
   build:
@@ -16,36 +19,29 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v2
 
-    - name: Set up Node.js
+    - name: Install Node
       uses: actions/setup-node@v3
-      with:
-        node-version: '22'
-
-    - name: Install dependencies
-      run: cd web && npm install
-
-    - name: Run build
-      run: cd web && npm run build
-
-    # - name: Run tests
-    #   run: npm test
 
     - name: Install Rust
       uses: actions-rs/toolchain@v1
       with:
         toolchain: stable
 
-    - name: Build
-      run: cd user-end && cargo build --verbose --release
+    # 安装msys 这样windows编译环境就可以直接使用shell脚本
+    - name: Install msys
+      uses: msys2/setup-msys2@v2  
 
-    # - name: Run tests
-    #   run: cargo test --verbose
+    - name: Run build
+      run: |
+        cd script
+        chmod +x build_ci.sh
+        ./build_ci.sh
 
     - name: Upload production-ready build files
       if: success()
       uses: actions/upload-artifact@v2
       with:
-        name: win
+        name: v2ray_r.exe
         path: user-end/target/release/v2ray_r.exe
 
 
