@@ -86,7 +86,7 @@ jobs:
       id: create_release
       uses: actions/create-release@v1
       env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        GITHUB_TOKEN: ${{ secrets.PAT }}
       with:
         tag_name: ${{ github.ref }}
         release_name: Release ${{ github.ref }}
@@ -96,7 +96,7 @@ jobs:
     - name: Upload Release Asset for Windows
       uses: actions/upload-release-asset@v1
       env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        GITHUB_TOKEN: ${{ secrets.PAT }}
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
         asset_path: v2ray_r-windows
@@ -106,7 +106,7 @@ jobs:
     # - name: Upload Release Asset for Linux
     #   uses: actions/upload-release-asset@v1
     #   env:
-    #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    #     GITHUB_TOKEN: ${{ secrets.PAT }}
     #   with:
     #     upload_url: ${{ steps.create_release.outputs.upload_url }}
     #     asset_path: v2ray_r-linux
