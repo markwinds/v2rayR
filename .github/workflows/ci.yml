@@ -34,8 +34,7 @@ jobs:
     - name: Run build
       run: |
         cd script
-        chmod +x build_ci.sh
-        ./build_ci.sh
+        bash ./build_ci.sh
 
     - name: Upload production-ready build files
       if: success()
