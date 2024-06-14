@@ -7,16 +7,6 @@ use rust_embed::Embed;
 #[folder = "../web/dist/"]
 struct Asset;
 
-// 从静态文件目录中读取图标数据
-pub fn get_program_icon() -> &'static [u8] {
-    match Asset::get("favicon.ico") {
-        Some(content) => {
-            content.data.as_ref()
-        }
-        None => { panic!("not find icon") }
-    }
-}
-
 // 处理静态文件请求 返回对应的文件
 fn handle_embedded_file(path: &str) -> HttpResponse {
     match Asset::get(path) {

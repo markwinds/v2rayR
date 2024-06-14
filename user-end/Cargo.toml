@@ -26,9 +26,8 @@ flate2 = "1.0.30"
 chrono = "0.4.38"
 toml = "0.8.14"
 serde = { version = "1.0.203", features = ["derive"] }
-#tao = "0.28.1"
-#image = "0.25.1"
-tray-item = "0.10.0"
+systray = "0.4.0"
+
 
 [profile.release]
 lto = true        # 开启链接时优化 可以减小二进制体积并加快运行速度
