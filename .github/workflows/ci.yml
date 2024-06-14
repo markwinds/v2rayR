@@ -7,6 +7,7 @@ on:
     branches: [ main ]
   pull_request:
     branches: [ main ]
+  workflow_dispatch:  # 手动触发
 
 # jobs中每个job都是独立的一个虚拟环境，jobs之间是并行运行的
 jobs:
