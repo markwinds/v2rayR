@@ -32,6 +32,13 @@ jobs:
       uses: msys2/setup-msys2@v2  
 
     - name: Run build
+      if: runner.os == 'Windows'
+      run: |
+        cd script
+        bash ./build_ci.sh
+
+    - name: Run build
+      if: runner.os == 'Linux'
       run: |
         cd script
         chmod +x build_ci.sh
@@ -41,14 +48,14 @@ jobs:
       if: runner.os == 'Windows'
       uses: actions/upload-artifact@v3
       with:
-        name: v2ray_r.exe
+        name: v2ray_r-windows
         path: user-end/target/release/v2ray_r.exe
 
     - name: Upload artifact linux
       if: runner.os == 'Linux'
       uses: actions/upload-artifact@v3
       with:
-        name: v2ray_r
+        name: v2ray_r-linux
         path: user-end/target/release/v2ray_r
 
 
@@ -64,13 +71,13 @@ jobs:
     - name: Download artifacts windows
       uses: actions/download-artifact@v3
       with:
-        name: v2ray_r.exe
+        name: v2ray_r-windows
         path: ./
 
     - name: Download artifacts linux
       uses: actions/download-artifact@v3
       with:
-        name: v2ray_r
+        name: v2ray_r-linux
         path: ./
 
     - name: Create GitHub Release
@@ -90,8 +97,8 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: v2ray_r.exe
-        asset_name: build-windows-latest.zip
+        asset_path: v2ray_r-windows
+        asset_name: v2ray_r-windows.zip
         asset_content_type: application/zip
 
     - name: Upload Release Asset for Linux
@@ -100,6 +107,6 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: v2ray_r
-        asset_name: build-ubuntu-latest.zip
+        asset_path: v2ray_r-linux
+        asset_name: v2ray_r-linux.zip
         asset_content_type: application/zip
