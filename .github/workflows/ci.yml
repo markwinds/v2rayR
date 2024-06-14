@@ -30,9 +30,6 @@ jobs:
     # - name: Run tests
     #   run: npm test
 
-    - name: Checkout code
-      uses: actions/checkout@v2
-
     - name: Install Rust
       uses: actions-rs/toolchain@v1
       with:
