@@ -40,7 +40,7 @@ jobs:
       if: success()
       uses: actions/upload-artifact@v2
       with:
-        name: v2ray_r.exe
+        name: v2ray_r-win # 文件夹名称
         path: user-end/target/release/v2ray_r.exe
 
 
