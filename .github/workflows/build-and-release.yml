@@ -12,7 +12,8 @@ jobs:
 
     strategy:
       matrix:
-        os: [ubuntu-latest, windows-latest]
+        os: [windows-latest]
+        # os: [ubuntu-latest, windows-latest]
 
     steps:
     - name: Checkout code
@@ -74,11 +75,11 @@ jobs:
         name: v2ray_r-windows
         path: ./
 
-    - name: Download artifacts linux
-      uses: actions/download-artifact@v3
-      with:
-        name: v2ray_r-linux
-        path: ./
+    # - name: Download artifacts linux
+    #   uses: actions/download-artifact@v3
+    #   with:
+    #     name: v2ray_r-linux
+    #     path: ./
 
     - name: Create GitHub Release
       id: create_release
@@ -101,12 +102,12 @@ jobs:
         asset_name: v2ray_r-windows.zip
         asset_content_type: application/zip
 
-    - name: Upload Release Asset for Linux
-      uses: actions/upload-release-asset@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: v2ray_r-linux
-        asset_name: v2ray_r-linux.zip
-        asset_content_type: application/zip
+    # - name: Upload Release Asset for Linux
+    #   uses: actions/upload-release-asset@v1
+    #   env:
+    #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    #   with:
+    #     upload_url: ${{ steps.create_release.outputs.upload_url }}
+    #     asset_path: v2ray_r-linux
+    #     asset_name: v2ray_r-linux.zip
+    #     asset_content_type: application/zip
