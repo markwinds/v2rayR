@@ -46,7 +46,7 @@ jobs:
         toolchain: stable
 
     - name: Build
-      run: cargo build --verbose --release
+      run: cd user-end && cargo build --verbose --release
 
     # - name: Run tests
     #   run: cargo test --verbose
