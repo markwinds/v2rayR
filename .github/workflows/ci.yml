@@ -1,0 +1,62 @@
+name: CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+
+  build_web:
+
+    runs-on: windows-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Set up Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '22'
+
+    - name: Install dependencies
+      run: cd web && npm install
+
+    - name: Run build
+      run: cd web && npm run build
+
+    # - name: Run tests
+    #   run: npm test
+
+
+  build_user_end:
+
+    runs-on: windows-latest
+    needs: build_web
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Install Rust
+      uses: actions-rs/toolchain@v1
+      with:
+        toolchain: stable
+
+    - name: Build
+      run: cargo build --verbose --release
+
+    # - name: Run tests
+    #   run: cargo test --verbose
+
+    - name: Upload production-ready build files
+      if: success()
+      uses: actions/upload-artifact@v2
+      with:
+        name: win
+        path: user-end/target/release/v2ray_r.exe
+
+
+

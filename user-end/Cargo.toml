@@ -28,6 +28,8 @@ toml = "0.8.14"
 serde = { version = "1.0.203", features = ["derive"] }
 systray = "0.4.0"
 
+[profile.dev]
+opt-level = 0
 
 [profile.release]
 lto = true        # 开启链接时优化 可以减小二进制体积并加快运行速度
