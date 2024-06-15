@@ -55,7 +55,7 @@ fi
 
 show g "-------------build user-end-------------"
 cd $user_end_dir 
-cargo build --release
+cargo build --release --features "gui"
 if [ $? -ne 0 ]; then
     show r "cargo build failed"
     exit 1
