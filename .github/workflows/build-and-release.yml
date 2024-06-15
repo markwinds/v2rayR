@@ -10,6 +10,10 @@ on:
         description: 'The version for the release'
         required: true
         default: 'v0.0.0'
+      release_body:
+        description: 'Release description'
+        required: true
+        default: 'release'
 
 jobs:
   build:
@@ -94,7 +98,8 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.PAT }}
       with:
         tag_name: ${{ github.event.inputs.release_version }}
-        release_name: Release ${{ github.event.inputs.release_version }}
+        release_name: ${{ github.event.inputs.release_version }}
+        body: ${{ github.event.inputs.release_body }}
         draft: false
         prerelease: false
 
@@ -104,9 +109,9 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.PAT }}
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: v2ray_r-windows
-        asset_name: v2ray_r-windows.zip
-        asset_content_type: application/zip
+        asset_path: v2ray_r.exe
+        asset_name: v2ray_r.exe
+        asset_content_type: application/octet-stream
 
     # - name: Upload Release Asset for Linux
     #   uses: actions/upload-release-asset@v1
