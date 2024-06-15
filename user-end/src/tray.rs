@@ -1,3 +1,5 @@
+use std::thread;
+
 pub fn add_tray() -> Result<(), systray::Error> {
     let mut app = systray::Application::new()?;
 
@@ -25,6 +27,8 @@ pub fn add_tray() -> Result<(), systray::Error> {
     //     Ok::<_, systray::Error>(())
     // })?;
 
-    app.wait_for_message()?;
+    thread::spawn(move || {
+        app.wait_for_message().unwrap();
+    });
     Ok(())
 }
