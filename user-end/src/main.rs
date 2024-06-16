@@ -3,7 +3,6 @@
 // 日志
 // panic捕捉
 
-// 尝试打开多种浏览器
 // 本地设置界面 + 自动检查并从github更新  github路径可配
 
 // 写在main.rs的第一行 指示编译器生成GUI程序而不是console程序 这样编译出来的windows程序就不会弹出黑框

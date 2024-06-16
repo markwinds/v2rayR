@@ -2,7 +2,7 @@ use std::process::Command;
 
 use chrono::{Datelike, Local, Timelike};
 
-use crate::{log_d, log_e, log_w, Logger, LogLevel};
+use crate::{log_w, Logger, LogLevel};
 use crate::config::Config;
 
 pub fn get_time_str_ms() -> String {
@@ -50,7 +50,8 @@ pub fn open_web() {
         let res = Command::new("cmd")
             .arg("/c")
             .arg("start")
-            .arg("chrome")
+            // 不指定浏览器 使用默认浏览器打开
+            // .arg("chrome")
             .arg(web_url)
             .output();
 
