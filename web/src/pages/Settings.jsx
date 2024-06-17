@@ -1,6 +1,7 @@
 // src/components/Settings.jsx
 import React, {useState} from 'react';
 import {Form, Input, Button, Select, Divider, notification} from 'antd';
+import {debouncedService as axios} from '../utils/request.jsx';
 
 const {Option} = Select;
 
@@ -14,22 +15,46 @@ const Settings = () => {
 
   const handleSaveAndRestart = () => {
     // 保存参数并重启的逻辑
-    notification.success({message: '保存参数并重启成功'});
+    axios.get('/settings/save-and-reset')
+      .then((response) => {
+        notification.success({message: '保存参数并重启成功'});
+      })
+      .catch((error) => {
+        notification.error({message: '保存参数并重启失败'});
+      });
   };
 
   const handleExit = () => {
     // 退出程序的逻辑
-    notification.warning({message: '程序已退出'});
+    axios.post('/api/exit')
+      .then(() => {
+        notification.warning({message: '程序已退出'});
+      })
+      .catch((error) => {
+        notification.error({message: '退出程序失败'});
+      });
   };
 
   const handleRestart = () => {
     // 重启程序的逻辑
-    notification.info({message: '程序已重启'});
+    axios.post('/api/restart')
+      .then(() => {
+        notification.info({message: '程序已重启'});
+      })
+      .catch((error) => {
+        notification.error({message: '重启程序失败'});
+      });
   };
 
   const handleAutoUpdate = () => {
     // 自动更新的逻辑
-    notification.success({message: '自动更新成功'});
+    axios.post('/api/auto-update')
+      .then(() => {
+        notification.success({message: '自动更新成功'});
+      })
+      .catch((error) => {
+        notification.error({message: '自动更新失败'});
+      });
   };
 
   const handleResetDefaults = () => {

@@ -25,6 +25,7 @@ mod utils;
 mod web_dist;
 mod config;
 mod tray;
+mod service;
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
@@ -46,7 +47,11 @@ async fn main() -> std::io::Result<()> {
 
     add_tray().unwrap();
 
-    HttpServer::new(|| App::new().wrap(ReqTime).service(index).service(dist))
+    HttpServer::new(|| App::new()
+        .wrap(ReqTime)
+        .configure(service::init)
+        .service(index)
+        .service(dist))
         .bind("0.0.0.0:3333")?
         .run()
         .await
