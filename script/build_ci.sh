@@ -41,12 +41,12 @@ show()
 
 show g "-------------build web-------------"
 cd $web_dir
-npm install
+yarn install
 if [ $? -ne 0 ]; then
     show r "npm install failed"
     exit 1
 fi
-npm run build
+yarn run build
 if [ $? -ne 0 ]; then
     show r "npm run build failed"
     exit 1
