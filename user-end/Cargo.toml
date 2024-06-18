@@ -38,6 +38,7 @@ panic = "abort"   # 不保留崩溃时的堆栈信息
 
 [build-dependencies]
 winresource = "0.1.17"
+chrono = "0.4.38"
 
 [features]
 gui = [] # 是否在windows系统中以gui模式运行（以gui模式运行时，不会跳出console黑框并展示输出）

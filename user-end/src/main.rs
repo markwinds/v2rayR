@@ -9,12 +9,15 @@
 // #![windows_subsystem = "windows"]
 #![cfg_attr(feature = "gui", windows_subsystem = "windows")]
 
+use std::env;
+
 use actix_web::{App, HttpServer};
 
 use log::{Logger, LogLevel};
 use middleware::req_time::ReqTime;
 
 use crate::config::Config;
+// use crate::middleware::handle_panic::handle_panic;
 use crate::tray::add_tray;
 use crate::utils::open_web;
 use crate::web_dist::{dist, index};
@@ -29,6 +32,9 @@ mod service;
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
+    // 打印堆栈信息
+    env::set_var("RUST_BACKTRACE", "1");
+
     set_log_level!(LogLevel::WarningLevel);
 
     open_web();
@@ -48,8 +54,10 @@ async fn main() -> std::io::Result<()> {
     add_tray().unwrap();
 
     HttpServer::new(|| App::new()
-        .wrap(ReqTime)
+        // 越往下越外层
         .configure(service::init)
+        .wrap(ReqTime)
+        // .wrap_fn(handle_panic)
         .service(index)
         .service(dist))
         .bind("0.0.0.0:3333")?

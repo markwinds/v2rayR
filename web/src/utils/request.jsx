@@ -2,6 +2,7 @@ import axios from 'axios';
 import {notification, message, Spin} from 'antd';
 import {LoadingOutlined} from '@ant-design/icons';
 import {createRoot} from 'react-dom/client';
+import {showError} from "./notification.js";
 
 let loadingCount = 0;
 
@@ -77,21 +78,22 @@ service.interceptors.response.use(
     if (error.response) {
       const {status, data} = error.response;
       if (status === 400) {
-        notification.error({message: '请求错误', description: data.message});
+        showError(status + '：请求错误')
       } else if (status === 401) {
-        notification.error({message: '未授权', description: '请登录后再试'});
+        showError(status + '：未授权')
       } else if (status === 403) {
-        notification.error({message: '拒绝访问', description: '您没有权限进行此操作'});
+        showError(status + '：拒绝访问')
       } else if (status === 404) {
-        notification.error({message: '请求地址出错', description: '未找到请求的资源'});
+        showError(status + '：请求地址出错')
       } else if (status === 500) {
-        notification.error({message: '服务器内部错误', description: '请稍后重试'});
+        showError(status + '：服务器内部错误')
       } else {
-        notification.error({message: '请求失败', description: data.message || '请稍后重试'});
+        showError(status + '：请求失败')
       }
     } else {
-      notification.error({message: '网络错误', description: '无法连接到服务器'});
+      showError("请求失败，请检查网络")
     }
+
     return Promise.reject(error);
   }
 );

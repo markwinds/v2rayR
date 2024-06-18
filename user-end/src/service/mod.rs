@@ -1,6 +1,7 @@
 use actix_web::web;
 
 pub mod settings;
+mod resp;
 
 pub fn init(cfg: &mut actix_web::web::ServiceConfig) {
     cfg.service(

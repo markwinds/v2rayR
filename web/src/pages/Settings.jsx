@@ -1,14 +1,15 @@
 // src/components/Settings.jsx
-import React, {useState} from 'react';
+import React, {useEffect, useReducer, useState} from 'react';
 import {Form, Input, Button, Select, Divider, notification} from 'antd';
-import {service as axios} from '../utils/request.jsx';
+import {service, service as axios} from '../utils/request.jsx';
 
 const {Option} = Select;
 
 const Settings = () => {
-  const [logLevel, setLogLevel] = useState('Info');
+  const baseUrl = 'settings'
+  const [logLevel, setLogLevel] = useState('');
   const [dataDirectory, setDataDirectory] = useState('');
-  const [webPort, setWebPort] = useState('');
+  const [webPort, setWebPort] = useState(0);
 
   const currentVersion = '1.0.0'; // 当前软件版本
   const latestVersion = '1.1.0';  // 最新客户端版本
@@ -68,6 +69,22 @@ const Settings = () => {
   const onFinish = (values) => {
     console.log('Received values from form: ', values);
   };
+
+  async function getLatestVersion() {
+    let res = await service({
+      url: baseUrl + 'latest-version',
+    })
+    if (res.code !== reqSuccessCode) {
+      return
+    }
+    return
+    // dataList.value = res.result
+  }
+
+  // 页面刚挂载的时候执行的函数
+  useEffect(() => {
+    getLatestVersion()
+  })
 
   return (
     <div>
