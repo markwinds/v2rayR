@@ -1,12 +1,12 @@
 import {Layout} from 'antd';
 import Sidebar from '../components/Sidebar';
 import Settings from './Settings.jsx';
-import {BrowserRouter as Router, Route, Routes, Navigate} from 'react-router-dom';
+import {HashRouter as Router, Route, Routes, Navigate} from 'react-router-dom';
 
 const {Content} = Layout;
 
 const Home = () => (
-  <Router basename={import.meta.env.BASE_URL || '/'}>
+  <Router>
     <Layout style={{minHeight: '100vh'}}>
       <Sidebar/>
       <Layout style={{padding: '0 24px 24px'}}>
