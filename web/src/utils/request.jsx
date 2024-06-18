@@ -1,30 +1,35 @@
 import axios from 'axios';
 import {notification, message, Spin} from 'antd';
-import ReactDOM from 'react-dom';
+import {LoadingOutlined} from '@ant-design/icons';
+import {createRoot} from 'react-dom/client';
 
 let loadingCount = 0;
-let loadingMessage = null;
 
 // 创建一个 Spin 容器
 let spinContainer = document.createElement('div');
+let tmpRoot;
 
 const showSpin = () => {
-  spinContainer = document.createElement('div');
   document.body.appendChild(spinContainer);
-  ReactDOM.render(<Spin size="large" spinning={true} fullscreen/>, spinContainer);
+  tmpRoot = createRoot(spinContainer);
+
+  tmpRoot.render(<Spin size="large"
+                       spinning={true}
+                       fullscreen
+                       indicator={<LoadingOutlined spin/>}
+                       delay={200} // 只有请求时间超过500ms时，才会触发显示加载框
+    // tip="正在加载......"
+  />);
 };
 
 const hideSpin = () => {
-  if (spinContainer) {
-    ReactDOM.unmountComponentAtNode(spinContainer);
-    document.body.removeChild(spinContainer);
-  }
+  tmpRoot.unmount();
+  document.body.removeChild(spinContainer);
 };
 
 
 const showLoading = () => {
   if (loadingCount === 0) {
-    loadingMessage = message.loading({content: '正在加载...', duration: 0});
     showSpin()
   }
   loadingCount++;
@@ -32,22 +37,21 @@ const showLoading = () => {
 
 const hideLoading = () => {
   loadingCount--;
-  if (loadingCount === 0 && loadingMessage) {
-    loadingMessage();
-    loadingMessage = null;
+  if (loadingCount === 0) {
     hideSpin()
   }
 };
 
-const debounce = (func, wait = 300) => {
-  let timeout;
-  return (...args) => {
-    clearTimeout(timeout);
-    timeout = setTimeout(() => func(...args), wait);
-  };
-};
+// 防抖函数 应用：查找框，在数据变化间隔超过500ms后发起搜索
+// const debounce = (func, wait = 300) => {
+//   let timeout;
+//   return (...args) => {
+//     clearTimeout(timeout);
+//     timeout = setTimeout(() => func(...args), wait);
+//   };
+// };
 
-const service = axios.create({
+export const service = axios.create({
   baseURL: import.meta.env.VITE_BASE_API || '/',
   timeout: 10000, // 请求超时时间
 });
@@ -92,11 +96,4 @@ service.interceptors.response.use(
   }
 );
 
-export const debouncedService = {
-  get: debounce((url, config) => service.get(url, config)),
-  post: debounce((url, data, config) => service.post(url, data, config)),
-  put: debounce((url, data, config) => service.put(url, data, config)),
-  delete: debounce((url, config) => service.delete(url, config)),
-};
-
-export default debouncedService;
+export default {service};

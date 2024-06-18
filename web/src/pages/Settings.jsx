@@ -1,7 +1,7 @@
 // src/components/Settings.jsx
 import React, {useState} from 'react';
 import {Form, Input, Button, Select, Divider, notification} from 'antd';
-import {debouncedService as axios} from '../utils/request.jsx';
+import {service as axios} from '../utils/request.jsx';
 
 const {Option} = Select;
 
