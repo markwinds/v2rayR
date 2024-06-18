@@ -1,18 +1,8 @@
 // src/services/api.rs
 
-use std::thread;
-use std::time::Duration;
-
 use actix_web::{HttpResponse, Responder, web};
 
-fn users() -> impl Responder {
-    thread::sleep(Duration::from_secs(2));
-    HttpResponse::Ok().body("Users list")
-}
-
-async fn user_detail(path: web::Path<(u32, )>) -> impl Responder {
-    HttpResponse::Ok().body(format!("User detail: {}", path.0))
-}
+use crate::service::resp::ApiError::ERR1;
 
 pub fn init(cfg: &mut web::ServiceConfig) {
     cfg.service(
@@ -33,5 +23,7 @@ async fn get_now_version_parse() -> impl Responder {
 
 async fn test_1() -> impl Responder {
     // Ok::<HttpResponse, E>(ApiResponse::success("okkkkkkkk"))
-    HttpResponse::Ok().body(format!("User detail: {}", ""))
+    // HttpResponse::Ok().body(format!("User detail: {}", ""))
+
+    ERR1
 }
