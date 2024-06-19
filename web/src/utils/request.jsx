@@ -1,10 +1,11 @@
 import axios from 'axios';
-import {notification, message, Spin} from 'antd';
+import {Spin} from 'antd';
 import {LoadingOutlined} from '@ant-design/icons';
 import {createRoot} from 'react-dom/client';
 import {showError} from "./notification.js";
 
 let loadingCount = 0;
+export let reqSuccessCode = 0;
 
 // 创建一个 Spin 容器
 let spinContainer = document.createElement('div');
@@ -71,7 +72,27 @@ service.interceptors.request.use(
 service.interceptors.response.use(
   (response) => {
     hideLoading();
-    return response.data;
+
+    if (response.config.responseType === 'arraybuffer') {
+      if (!response.headers.hasOwnProperty('err-code')) {
+        // 没有错误信息 直接返回二进制数据
+        return response
+      }
+      // 有错误信息 将arraybuffer转为json
+      const arrayBuffer = response.data
+      const dataView = new DataView(arrayBuffer)
+      const decoder = new TextDecoder('utf-8')
+      const jsonString = decoder.decode(dataView)
+      response.data = JSON.parse(jsonString)
+    }
+    if (response.data.code === reqSuccessCode) {
+      return response.data
+    }
+
+    console.log("data", response.data)
+    showError(response.data.zh_msg === '' ? '未知错误' : response.data.zh_msg)
+
+    return response.data
   },
   (error) => {
     hideLoading();
@@ -98,4 +119,4 @@ service.interceptors.response.use(
   }
 );
 
-export default {service};
+export default {service, reqSuccessCode};

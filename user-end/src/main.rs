@@ -1,4 +1,3 @@
-// 中间件
 // 统计耗时
 // 日志
 // panic捕捉
@@ -37,30 +36,26 @@ async fn main() -> std::io::Result<()> {
 
     set_log_level!(LogLevel::WarningLevel);
 
+    #[cfg(not(debug_assertions))]
     open_web();
 
     {
         let config_ins = Config::instance();
         let config = config_ins.lock().unwrap();
-        println!("read config{:?}", config);
+        log_w!("read config{:?}", config);
         set_log_level!(config.log_config.level)
     }
-
-    log_d!("debug");
-    log_i!("info");
-    log_w!("warn");
-    log_e!("error");
 
     add_tray().unwrap();
 
     HttpServer::new(|| App::new()
         // 越往下越外层
         .configure(service::init)
-        .wrap(ReqTime)
+        // .wrap(ReqTime)
         // .wrap_fn(handle_panic)
         .service(index)
         .service(dist))
-        .bind("0.0.0.0:3333")?
+        .bind("127.0.0.1:3333")?
         .run()
         .await
 }

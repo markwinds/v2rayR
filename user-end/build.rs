@@ -14,7 +14,7 @@ fn main() -> io::Result<()> {
 
     // 获取当前时间并格式化为所需的格式
     let now: DateTime<Utc> = Utc::now();
-    let build_time = now.format("%Y%m%d%H%M%S").to_string();
+    let build_time = now.format("%Y-%m-%d_%H:%M:%S").to_string();
 
     // 将信息写入环境变量
     println!("cargo:rustc-env=VERSION={}", version);

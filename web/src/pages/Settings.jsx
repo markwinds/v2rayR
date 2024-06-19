@@ -1,7 +1,7 @@
 // src/components/Settings.jsx
 import React, {useEffect, useReducer, useState} from 'react';
 import {Form, Input, Button, Select, Divider, notification} from 'antd';
-import {service, service as axios} from '../utils/request.jsx';
+import {service, service as axios, reqSuccessCode} from '../utils/request.jsx';
 
 const {Option} = Select;
 
@@ -11,7 +11,7 @@ const Settings = () => {
   const [dataDirectory, setDataDirectory] = useState('');
   const [webPort, setWebPort] = useState(0);
 
-  const currentVersion = '1.0.0'; // 当前软件版本
+  const [currentVersion, setCurrentVersion] = useState("v0.0.0")
   const latestVersion = '1.1.0';  // 最新客户端版本
 
   const handleSaveAndRestart = () => {
@@ -72,18 +72,29 @@ const Settings = () => {
 
   async function getLatestVersion() {
     let res = await service({
-      url: baseUrl + 'latest-version',
+      url: baseUrl + '/latest-version',
     })
     if (res.code !== reqSuccessCode) {
       return
     }
-    return
-    // dataList.value = res.result
+    setCurrentVersion(res.result)
+  }
+
+  async function getCurrentVersion() {
+    let res = await service({
+      url: baseUrl + '/now-version',
+    })
+    if (res.code !== reqSuccessCode) {
+      return
+    }
+    setCurrentVersion(res.result)
   }
 
   // 页面刚挂载的时候执行的函数
   useEffect(() => {
-    getLatestVersion()
+    console.log("mount")
+    getCurrentVersion()
+    // getLatestVersion()
   })
 
   return (

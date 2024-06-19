@@ -27,6 +27,7 @@ chrono = "0.4.38"
 toml = "0.8.14"
 serde = { version = "1.0.203", features = ["derive"] }
 systray = "0.4.0"
+backtrace = "0.3.73"
 
 [profile.dev]
 opt-level = 0
