@@ -2,6 +2,7 @@
 import React, {useEffect, useReducer, useState} from 'react';
 import {Form, Input, Button, Select, Divider, notification} from 'antd';
 import {service, service as axios, reqSuccessCode} from '../utils/request.jsx';
+import {showSuccess} from "../utils/notification.js";
 
 const {Option} = Select;
 
@@ -25,27 +26,25 @@ const Settings = () => {
       });
   };
 
-  const handleExit = () => {
-    // 退出程序的逻辑
-    axios.post('/api/exit')
-      .then(() => {
-        notification.warning({message: '程序已退出'});
-      })
-      .catch((error) => {
-        notification.error({message: '退出程序失败'});
-      });
+  async function handleExit() {
+    let res = await service({
+      url: baseUrl + "/stop"
+    })
+    if (res.code !== reqSuccessCode) {
+      return
+    }
+    showSuccess("程序退出")
   };
 
-  const handleRestart = () => {
-    // 重启程序的逻辑
-    axios.post('/api/restart')
-      .then(() => {
-        notification.info({message: '程序已重启'});
-      })
-      .catch((error) => {
-        notification.error({message: '重启程序失败'});
-      });
-  };
+  async function handleRestart() {
+    let res = await service({
+      url: baseUrl + '/restart',
+    })
+    if (res.code !== reqSuccessCode) {
+      return
+    }
+    showSuccess("重启成功")
+  }
 
   const handleAutoUpdate = () => {
     // 自动更新的逻辑

@@ -28,6 +28,16 @@ toml = "0.8.14"
 serde = { version = "1.0.203", features = ["derive"] }
 systray = "0.4.0"
 backtrace = "0.3.73"
+tokio = "1.38.0"
+encoding_rs = "0.8.34"
+
+[dependencies.uuid]
+version = "1.8.0"
+features = [
+    "v4", # Lets you generate random UUIDs
+    "fast-rng", # Use a faster (but still sufficiently random) RNG
+    "macro-diagnostics", # Enable better diagnostics for compile-time UUIDs
+]
 
 [profile.dev]
 opt-level = 0

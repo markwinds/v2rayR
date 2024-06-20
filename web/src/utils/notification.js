@@ -26,7 +26,7 @@ function showMsg(msg, type, title) {
   // 延时显示，保证提示展示在顶层
   setTimeout(() => {
     notification[type]({
-      message: title,
+      // message: title,
       description: msg,
       duration: 4.5,
       placement: "bottomRight",
