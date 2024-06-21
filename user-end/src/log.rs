@@ -1,6 +1,7 @@
 use std::fmt::Arguments;
 use std::fs::{File, OpenOptions};
 use std::io::{self, BufWriter, Write};
+use std::panic;
 use std::path::Path;
 use std::sync::{Arc, Mutex};
 
@@ -90,11 +91,28 @@ impl Logger {
 
     pub fn instance() -> Arc<Mutex<Self>> {
         static INSTANCE: Lazy<Arc<Mutex<Logger>>> = Lazy::new(|| {
+            Logger::save_panic_info();
             let logger =
                 Logger::new(LOG_FILENAME, LogLevel::DebugLevel).expect("Failed to create logger");
             Arc::new(Mutex::new(logger))
         });
         INSTANCE.clone()
+    }
+
+    pub fn save_panic_info() {
+        panic::set_hook(Box::new(|info| {
+            let file_path = LOG_FILENAME;
+
+            // 打开文件并设置为追加模式
+            let mut file = OpenOptions::new()
+                .create(true)
+                .append(true)
+                .open(file_path)
+                .expect("Could not open panic log file");
+
+            // 写入 panic 信息
+            write!(file, "\nPanic occurred: {}\n", info).expect("Could not write to panic log file");
+        }));
     }
 
     pub fn set_level(&mut self, level: LogLevel) {
