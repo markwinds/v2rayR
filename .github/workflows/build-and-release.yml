@@ -44,6 +44,10 @@ jobs:
     - name: Install msys
       if: runner.os == 'Windows'
       uses: msys2/setup-msys2@v2  
+      with:
+        update: true
+        install: >
+          zip
 
     - name: Run build
       if: runner.os == 'Windows'

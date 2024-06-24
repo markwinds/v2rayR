@@ -34,6 +34,10 @@ jobs:
     # 安装msys 这样windows编译环境就可以直接使用shell脚本
     - name: Install msys
       uses: msys2/setup-msys2@v2  
+      with:
+        update: true
+        install: >
+          zip
 
     - name: Run build
       run: |
