@@ -75,8 +75,8 @@ jobs:
     - name: Upload artifact
       uses: actions/upload-artifact@v3
       with:
-        name: v2ray_r.gz
-        path: user-end/v2ray_r.gz
+        name: v2ray_r.tar.gz
+        path: user-end/v2ray_r.tar.gz
 
 
   release:
@@ -103,7 +103,7 @@ jobs:
     - name: Download artifacts
       uses: actions/download-artifact@v3
       with:
-        name: v2ray_r.gz
+        name: v2ray_r.tar.gz
         path: ./
 
     - name: Create GitHub Release
@@ -124,8 +124,8 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.PAT }}
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: v2ray_r.gz
-        asset_name: v2ray_r.gz
+        asset_path: v2ray_r.tar.gz
+        asset_name: v2ray_r.tar.gz
         asset_content_type: application/octet-stream
         # asset_content_type: application/octet-stream
 
