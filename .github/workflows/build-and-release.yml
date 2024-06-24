@@ -49,8 +49,19 @@ jobs:
         install: >
           zip
 
-    - name: Add MSYS2 to PATH
-      run: echo "C:\msys64\usr\bin" >> $GITHUB_PATH
+    # - name: Add MSYS2 to PATH
+    #   run: echo "C:\msys64\usr\bin" >> $GITHUB_PATH
+
+    - name: Set up Chocolatey
+      if: runner.os == 'Windows'
+      run: |
+        Set-ExecutionPolicy Bypass -Scope Process -Force; `
+        [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072; `
+        iex ((New-Object System.Net.WebClient).DownloadString('https://chocolatey.org/install.ps1'))
+
+    - name: Install Zip
+      if: runner.os == 'Windows'
+      run: choco install zip -y
 
     - name: Run build
       if: runner.os == 'Windows'
