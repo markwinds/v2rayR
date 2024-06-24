@@ -13,7 +13,6 @@ use std::env;
 use actix_web::{App, HttpServer};
 
 use log::{Logger, LogLevel};
-use middleware::req_time::ReqTime;
 
 use crate::config::Config;
 // use crate::middleware::handle_panic::handle_panic;

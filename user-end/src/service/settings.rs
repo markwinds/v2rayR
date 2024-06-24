@@ -1,14 +1,11 @@
 use std::{env, fs, process};
 use std::cmp::Ordering;
-use std::error::Error;
 use std::fs::File;
-use std::future::Future;
 use std::io::Write;
 use std::path::Path;
 use std::process::{Command, exit};
 
 use actix_web::{HttpResponse, Responder, web};
-use tokio::io::AsyncWriteExt;
 use tokio::time::{Duration, sleep};
 use uuid::Uuid;
 
@@ -16,14 +13,33 @@ use crate::{conv_err, log_d, log_e, log_w, Logger, LogLevel, unwrap_res};
 use crate::service::resp::{ApiError, ApiResponse};
 use crate::utils::extract_tar_gz;
 
+const GITHUB_OWNER: &str = "markwinds";
+const GITHUB_REPO: &str = "v2rayR";
+
 pub fn init(cfg: &mut web::ServiceConfig) {
     cfg.service(
         web::scope("/settings")
             .route("stop", web::get().to(stop_program))
             .route("restart", web::get().to(restart_program))
             .route("check-and-update", web::get().to(check_and_update))
+            .route("save-and-restart", web::post().to(save_and_reset))
+            .route("restore-default-param", web::post().to(restore_default_param))
+            .route("latest-version", web::get().to(get_latest_version))
             .route("now-version", web::get().to(get_now_version_parse))
     );
+}
+
+async fn save_and_reset() -> impl Responder {
+    ""
+}
+
+async fn restore_default_param() -> impl Responder {
+    ""
+}
+
+async fn get_latest_version() -> impl Responder {
+    let latest_version = unwrap_res!(get_latest_release(GITHUB_OWNER, GITHUB_REPO).await);
+    ApiResponse::ok(latest_version)
 }
 
 async fn get_now_version_parse() -> impl Responder {
@@ -136,8 +152,8 @@ async fn run_cmd_in_new_process(cmd_str: &str, time_s: u32) {
 
 // 检查是否有最新版本发布 并尝试更新
 async fn check_and_update() -> impl Responder {
-    let github_owner = "markwinds";
-    let github_repo = "v2rayR";
+    let github_owner = GITHUB_OWNER;
+    let github_repo = GITHUB_REPO;
 
     let latest_version = unwrap_res!(get_latest_release(github_owner, github_repo).await);
     let now_version = env!("VERSION");
@@ -156,6 +172,7 @@ async fn check_and_update() -> impl Responder {
 async fn get_latest_release(owner: &str, repo: &str) -> Result<String, ApiError> {
     let url = format!("https://api.github.com/repos/{}/{}/releases/latest", owner, repo);
     let resp = reqwest::get(&url).await.map_err(conv_err!(ApiError::GithubReqErr))?;
+    log_d!("resp:{:?}",resp);
     let json_resp = resp.json::<serde_json::Value>().await.map_err(conv_err!(ApiError::GithubReqErr))?;
 
     Ok(remove_leading_v(json_resp["tag_name"].as_str().unwrap()).await.to_string())
@@ -184,7 +201,7 @@ async fn download_latest_version(owner: &str, repo: &str, version: &str, file_na
 // 下载并替换程序
 async fn download_and_replace(owner: &str, repo: &str, version: &str) -> Result<(), ApiError> {
     let file_name = "v2ray_r.tar.gz";
-    download_latest_version(owner, repo, version, file_name)?;
+    download_latest_version(owner, repo, version, file_name).await?;
 
     // 获取当前程序的名称
     let args: Vec<String> = env::args().collect();
@@ -208,7 +225,7 @@ async fn download_and_replace(owner: &str, repo: &str, version: &str) -> Result<
             .arg(client_name)
     }
 
-    tokio::spawn(move || async {
+    tokio::spawn(async move {
         let mut cmd = String::from("");
         // 删除旧程序
         #[cfg(target_os = "windows")]

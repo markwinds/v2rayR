@@ -13,7 +13,7 @@ const Settings = () => {
   const [webPort, setWebPort] = useState(0);
 
   const [currentVersion, setCurrentVersion] = useState("v0.0.0")
-  const latestVersion = '1.1.0';  // 最新客户端版本
+  const [latestVersion, setLatestVersion] = useState("v0.0.0")
 
   const handleSaveAndRestart = () => {
     // 保存参数并重启的逻辑
@@ -76,7 +76,7 @@ const Settings = () => {
     if (res.code !== reqSuccessCode) {
       return
     }
-    setCurrentVersion(res.result)
+    setLatestVersion(res.result)
   }
 
   async function getCurrentVersion() {
@@ -91,9 +91,8 @@ const Settings = () => {
 
   // 页面刚挂载的时候执行的函数
   useEffect(() => {
-    console.log("mount")
     getCurrentVersion()
-    // getLatestVersion()
+    getLatestVersion()
   })
 
   return (

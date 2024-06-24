@@ -101,6 +101,8 @@ impl Logger {
 
     pub fn save_panic_info() {
         panic::set_hook(Box::new(|info| {
+            let backtrace = Backtrace::new();
+
             let file_path = LOG_FILENAME;
 
             // 打开文件并设置为追加模式
@@ -111,7 +113,9 @@ impl Logger {
                 .expect("Could not open panic log file");
 
             // 写入 panic 信息
-            write!(file, "\nPanic occurred: {}\n", info).expect("Could not write to panic log file");
+            let str = format!("\nPanic occurred: {}\n {:?}", info, backtrace);
+            println!("{}", str);
+            write!(file, "{}", str).expect("Could not write to panic log file");
         }));
     }
 
