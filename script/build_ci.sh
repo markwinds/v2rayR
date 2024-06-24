@@ -60,3 +60,8 @@ if [ $? -ne 0 ]; then
     show r "cargo build failed"
     exit 1
 fi
+
+
+show g "---------------compress-----------------"
+cd $user_end_dir 
+zip -j v2ray-r.zip target/release/v2ray-r target/release/v2ray-r.exe
