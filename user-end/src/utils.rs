@@ -1,6 +1,11 @@
+use std::fs::File;
+use std::io;
+use std::io::BufReader;
 use std::process::Command;
 
 use chrono::{Datelike, Local, Timelike};
+use flate2::read::GzDecoder;
+use tar::Archive;
 
 use crate::{log_w, Logger, LogLevel};
 use crate::config::Config;
@@ -70,3 +75,14 @@ pub fn open_web() {
     }
 }
 
+pub fn extract_tar_gz(tar_gz_path: &str, output_dir: &str) -> io::Result<()> {
+    // 打开 .tar.gz 文件
+    let tar_gz = File::open(tar_gz_path)?;
+    // 创建 GzDecoder 以解压 gzip 部分
+    let tar = GzDecoder::new(BufReader::new(tar_gz));
+    // 解压 tar 文件
+    let mut archive = Archive::new(tar);
+    archive.unpack(output_dir)?;
+
+    Ok(())
+}
