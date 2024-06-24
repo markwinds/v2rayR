@@ -64,4 +64,8 @@ fi
 
 show g "---------------compress-----------------"
 cd $user_end_dir 
-zip -j v2ray-r.zip target/release/v2ray-r target/release/v2ray-r.exe
+output_dir=v2ray-r
+mkdir $output_dir
+cp target/release/v2ray-r $output_dir/
+cp target/release/v2ray-r.exe $output_dir/
+gzip $output_dir/*

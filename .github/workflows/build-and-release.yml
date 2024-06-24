@@ -44,24 +44,6 @@ jobs:
     - name: Install msys
       if: runner.os == 'Windows'
       uses: msys2/setup-msys2@v2  
-      with:
-        update: true
-        install: >
-          zip
-
-    # - name: Add MSYS2 to PATH
-    #   run: echo "C:\msys64\usr\bin" >> $GITHUB_PATH
-
-    - name: Set up Chocolatey
-      if: runner.os == 'Windows'
-      run: |
-        Set-ExecutionPolicy Bypass -Scope Process -Force; `
-        [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072; `
-        iex ((New-Object System.Net.WebClient).DownloadString('https://chocolatey.org/install.ps1'))
-
-    - name: Install Zip
-      if: runner.os == 'Windows'
-      run: choco install zip -y
 
     - name: Run build
       if: runner.os == 'Windows'
@@ -93,8 +75,8 @@ jobs:
     - name: Upload artifact
       uses: actions/upload-artifact@v3
       with:
-        name: v2ray_r.zip
-        path: user-end/v2ray_r.zip
+        name: v2ray_r.gz
+        path: user-end/v2ray_r.gz
 
 
   release:
@@ -121,7 +103,7 @@ jobs:
     - name: Download artifacts
       uses: actions/download-artifact@v3
       with:
-        name: v2ray_r.zip
+        name: v2ray_r.gz
         path: ./
 
     - name: Create GitHub Release
@@ -142,9 +124,9 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.PAT }}
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: v2ray_r.zip
-        asset_name: v2ray_r.zip
-        asset_content_type: application/zip
+        asset_path: v2ray_r.gz
+        asset_name: v2ray_r.gz
+        asset_content_type: application/octet-stream
         # asset_content_type: application/octet-stream
 
     # - name: Upload Release Asset for Linux
