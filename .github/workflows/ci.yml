@@ -38,6 +38,9 @@ jobs:
         update: true
         install: >
           zip
+      
+    - name: Add MSYS2 to PATH
+      run: echo "C:\msys64\usr\bin" >> $GITHUB_PATH
 
     - name: Run build
       run: |
