@@ -23,6 +23,8 @@ fn default_web_port() -> u16 {
     return 3333;
 }
 
+fn default_proxy() -> String { return "".to_string(); }
+
 #[derive(Serialize, Deserialize, Debug)]
 pub struct Config {
     pub log_config: LogConfig,
@@ -32,6 +34,9 @@ pub struct Config {
 
     #[serde(default = "default_web_port")]
     pub web_port: u16, // 本地web访问端口
+
+    #[serde(default = "default_proxy")]
+    pub proxy: String, // 软件使用的代理
 }
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -50,6 +55,7 @@ impl Default for Config {
             },
             data_dir: default_data_dir(),
             web_port: default_web_port(),
+            proxy: default_proxy(),
         }
     }
 }

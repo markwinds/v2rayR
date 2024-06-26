@@ -126,6 +126,7 @@ const Settings = () => {
           logLevel: 'Warning',
           dataDir: 'data',
           webPort: 3333,
+          proxy: "",
         }}
       >
         <Form.Item
@@ -153,6 +154,13 @@ const Settings = () => {
           rules={[{required: true, message: '请输入web监听端口!'}]}
         >
           <InputNumber/>
+        </Form.Item>
+        <Form.Item
+          name="proxy"
+          label="代理"
+          rules={[{required: false, message: '软件使用的代理!'}]}
+        >
+          <Input/>
         </Form.Item>
         <Form.Item>
           <Button type="primary" htmlType="submit">

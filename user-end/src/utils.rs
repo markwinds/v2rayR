@@ -1,5 +1,6 @@
+use std::{env, io};
+use std::env::VarError;
 use std::fs::File;
-use std::io;
 use std::io::BufReader;
 use std::process::Command;
 
@@ -8,7 +9,7 @@ use flate2::read::GzDecoder;
 use tar::Archive;
 
 use crate::{log_w, Logger, LogLevel};
-use crate::config::Config;
+use crate::config::{Config, LogConfig};
 
 pub fn get_time_str_ms() -> String {
     let now = Local::now();
@@ -86,3 +87,35 @@ pub fn extract_tar_gz(tar_gz_path: &str, output_dir: &str) -> io::Result<()> {
 
     Ok(())
 }
+
+struct HttpClient {
+    proxy_url: String, // 使用代理的地址
+}
+
+impl Default for HttpClient {
+    fn default() -> Self {
+        // 优先从配置文件读取 如果配置文件中没有则从环境变量读取
+        let mut proxy = Config::instance().lock().unwrap().proxy.clone();
+        if proxy == "" {
+            let http_proxy_res = env::var("HTTP_PROXY");
+            match http_proxy_res {
+                Ok(data) => {
+                    proxy = data.clone();
+                }
+                Err(_) => {
+                    let https_proxy_res = env::var("HTTPS_PROXY");
+                    match https_proxy_res {
+                        Ok(data) => { proxy = data.clone(); }
+                        Err(_) => {}
+                    }
+                }
+            }
+        }
+
+        HttpClient {
+            proxy_url: proxy,
+        }
+    }
+}
+
+impl HttpClient {}

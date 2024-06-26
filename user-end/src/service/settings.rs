@@ -6,6 +6,7 @@ use std::path::Path;
 use std::process::{Command, exit};
 
 use actix_web::{Responder, web};
+use reqwest::{Client, Proxy};
 use serde::{Deserialize, Serialize};
 use tokio::time::{Duration, sleep};
 use uuid::Uuid;
@@ -24,6 +25,7 @@ struct ConfigForm {
     log_level: LogLevel,
     data_dir: String,
     web_port: u16,
+    proxy: String,
 }
 
 impl ConfigForm {
@@ -32,10 +34,12 @@ impl ConfigForm {
             log_level: LogLevel::Debug,
             data_dir: "".to_string(),
             web_port: 0,
+            proxy: "".to_string(),
         };
         config_form.log_level = config.log_config.level;
         config_form.data_dir = config.data_dir.to_string_lossy().into_owned();
         config_form.web_port = config.web_port;
+        config_form.proxy = config.proxy.clone();
         config_form
     }
 
@@ -44,6 +48,7 @@ impl ConfigForm {
         config.log_config.level = self.log_level;
         config.data_dir = self.data_dir.parse().unwrap();
         config.web_port = self.web_port;
+        config.proxy = self.proxy.clone();
         config
     }
 }
@@ -215,7 +220,26 @@ async fn check_and_update() -> impl Responder {
 // 获取最新版本
 async fn get_latest_release(owner: &str, repo: &str) -> Result<String, ApiError> {
     let url = format!("https://api.github.com/repos/{}/{}/releases/latest", owner, repo);
-    let resp = reqwest::get(&url).await.map_err(conv_err!(ApiError::GithubReqErr))?;
+
+    // 创建代理
+    let proxy = Proxy::all("http://127.0.0.1:10809").unwrap();
+
+    // 创建客户端并配置代理
+    let client = Client::builder()
+        .proxy(proxy)
+        .build().unwrap();
+
+    // // 发送 GET 请求
+    // let res = client.get("http://www.example.com")
+    //     .send()
+    //     .await?;
+
+
+    // let resp = reqwest::get(&url).await.map_err(conv_err!(ApiError::GithubReqErr))?;
+
+    let resp = client.get(&url).header("User-Agent", "MyRustClient/1.0").send().await.map_err(conv_err!(ApiError::GithubReqErr))?;
+
+
     log_d!("resp:{:?}",resp);
     let json_resp = resp.json::<serde_json::Value>().await.map_err(conv_err!(ApiError::GithubReqErr))?;
 
