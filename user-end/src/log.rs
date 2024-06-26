@@ -12,7 +12,7 @@ use once_cell::sync::Lazy;
 use serde::{Deserialize, Serialize};
 use termcolor::{Color, ColorChoice, ColorSpec, StandardStream, WriteColor};
 
-use crate::log::LogLevel::ErrorLevel;
+use crate::log::LogLevel::Error;
 use crate::utils::{get_time_s_dir, get_time_str_ms};
 
 const LOG_FILENAME: &str = "v2rayR.log";
@@ -24,7 +24,7 @@ macro_rules! log_d {
     ($($arg:tt)*) => {{
         let file = std::file!();
         let line = std::line!();
-        Logger::instance().lock().unwrap().log(LogLevel::DebugLevel, format_args!($($arg)*), file, line);
+        Logger::instance().lock().unwrap().log(LogLevel::Debug, format_args!($($arg)*), file, line);
     }};
 }
 
@@ -33,7 +33,7 @@ macro_rules! log_i {
     ($($arg:tt)*) => {{
         let file = std::file!();
         let line = std::line!();
-        Logger::instance().lock().unwrap().log(LogLevel::InfoLevel, format_args!($($arg)*), file, line);
+        Logger::instance().lock().unwrap().log(LogLevel::Info, format_args!($($arg)*), file, line);
     }};
 }
 
@@ -42,7 +42,7 @@ macro_rules! log_w {
     ($($arg:tt)*) => {{
         let file = std::file!();
         let line = std::line!();
-        Logger::instance().lock().unwrap().log(LogLevel::WarningLevel, format_args!($($arg)*), file, line);
+        Logger::instance().lock().unwrap().log(LogLevel::Warning, format_args!($($arg)*), file, line);
     }};
 }
 
@@ -51,7 +51,7 @@ macro_rules! log_e {
     ($($arg:tt)*) => {{
         let file = std::file!();
         let line = std::line!();
-        Logger::instance().lock().unwrap().log(LogLevel::ErrorLevel, format_args!($($arg)*), file, line);
+        Logger::instance().lock().unwrap().log(LogLevel::Error, format_args!($($arg)*), file, line);
     }};
 }
 
@@ -64,10 +64,10 @@ macro_rules! set_log_level {
 
 #[derive(Debug, PartialEq, PartialOrd, Clone, Copy, Serialize, Deserialize)]
 pub enum LogLevel {
-    DebugLevel,
-    InfoLevel,
-    WarningLevel,
-    ErrorLevel,
+    Debug,
+    Info,
+    Warning,
+    Error,
 }
 
 pub struct Logger {
@@ -93,7 +93,7 @@ impl Logger {
         static INSTANCE: Lazy<Arc<Mutex<Logger>>> = Lazy::new(|| {
             Logger::save_panic_info();
             let logger =
-                Logger::new(LOG_FILENAME, LogLevel::DebugLevel).expect("Failed to create logger");
+                Logger::new(LOG_FILENAME, LogLevel::Debug).expect("Failed to create logger");
             Arc::new(Mutex::new(logger))
         });
         INSTANCE.clone()
@@ -153,17 +153,17 @@ impl Logger {
     pub fn log(&mut self, level: LogLevel, args: Arguments, file: &str, line: u32) {
         if level >= self.level {
             let level_str = match level {
-                LogLevel::DebugLevel => "D",
-                LogLevel::InfoLevel => "I",
-                LogLevel::WarningLevel => "W",
-                LogLevel::ErrorLevel => "E",
+                LogLevel::Debug => "D",
+                LogLevel::Info => "I",
+                LogLevel::Warning => "W",
+                LogLevel::Error => "E",
             };
 
             let output_color = match level {
-                LogLevel::DebugLevel => Color::Blue,
-                LogLevel::InfoLevel => Color::White,
-                LogLevel::WarningLevel => Color::Yellow,
-                LogLevel::ErrorLevel => Color::Red,
+                LogLevel::Debug => Color::Blue,
+                LogLevel::Info => Color::White,
+                LogLevel::Warning => Color::Yellow,
+                LogLevel::Error => Color::Red,
             };
 
             // Check file size
@@ -198,7 +198,7 @@ impl Logger {
 
             // 如果是大于等于error的打印 需要打印出响应堆栈 其他的不打印
             let log_str;
-            if level >= ErrorLevel {
+            if level >= Error {
                 // let bt = Backtrace::capture();
                 let bt = Backtrace::new();
 

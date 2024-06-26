@@ -43,7 +43,7 @@ macro_rules! create_api_response {
 
 // json文本协议统一返回的响应结构体
 #[derive(Debug, Serialize)]
-// #[serde(rename_all = "camelCase")]
+#[serde(rename_all = "camelCase")]
 pub struct ApiResponse<T: Serialize> {
     code: i32, // 错误码
     msg: String, // 错误码对应的说明

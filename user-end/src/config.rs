@@ -1,14 +1,18 @@
 use std::fs;
+use std::fs::File;
+use std::io::Write;
 use std::path::{Path, PathBuf};
 use std::sync::{Arc, Mutex};
 
 use once_cell::sync::Lazy;
 use serde::{Deserialize, Serialize};
 
-use crate::{log_e, Logger, LogLevel};
+use crate::{log_e, log_w, Logger, LogLevel};
+
+const CONFIG_FILEPATH: &str = "config.toml";
 
 fn default_log_config_level() -> LogLevel {
-    LogLevel::WarningLevel
+    LogLevel::Warning
 }
 
 fn default_data_dir() -> PathBuf {
@@ -63,15 +67,26 @@ impl Config {
         match Self::from_file(&path) {
             Ok(config) => config,
             Err(e) => {
-                log_e!("read config failed, file[{:?}], e[{:?}]",path.as_ref(),e);
+                log_w!("read config failed, file[{:?}], e[{:?}]",path.as_ref(),e);
                 Self::default()
             }
         }
     }
 
+    pub fn save_config(&self) {
+        let toml_string = toml::to_string(self).expect("Failed to serialize config to TOML");
+
+        let mut file = File::create(CONFIG_FILEPATH).unwrap();
+        file.write_all(toml_string.as_bytes()).unwrap();
+    }
+
+    pub fn restore_default_config() {
+        let _ = fs::remove_file(CONFIG_FILEPATH);
+    }
+
     pub fn instance() -> Arc<Mutex<Self>> {
         static INSTANCE: Lazy<Arc<Mutex<Config>>> = Lazy::new(|| {
-            let ins = Config::load_config("config.toml");
+            let ins = Config::load_config(CONFIG_FILEPATH);
             Arc::new(Mutex::new(ins))
         });
         INSTANCE.clone()

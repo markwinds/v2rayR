@@ -1,30 +1,29 @@
-// src/components/Settings.jsx
-import React, {useEffect, useReducer, useState} from 'react';
-import {Form, Input, Button, Select, Divider, notification} from 'antd';
-import {service, service as axios, reqSuccessCode} from '../utils/request.jsx';
+import {useEffect, useState} from 'react';
+import {Form, Input, Button, Select, Divider, InputNumber} from 'antd';
+import {service, reqSuccessCode} from '../utils/request.jsx';
 import {showSuccess} from "../utils/notification.js";
 
 const {Option} = Select;
 
 const Settings = () => {
   const baseUrl = 'settings'
-  const [logLevel, setLogLevel] = useState('');
-  const [dataDirectory, setDataDirectory] = useState('');
-  const [webPort, setWebPort] = useState(0);
+
+  const [form] = Form.useForm()
 
   const [currentVersion, setCurrentVersion] = useState("v0.0.0")
   const [latestVersion, setLatestVersion] = useState("v0.0.0")
 
-  const handleSaveAndRestart = () => {
-    // 保存参数并重启的逻辑
-    axios.get('/settings/save-and-reset')
-      .then((response) => {
-        notification.success({message: '保存参数并重启成功'});
-      })
-      .catch((error) => {
-        notification.error({message: '保存参数并重启失败'});
-      });
-  };
+  async function handleSaveAndRestart(values) {
+    let res = await service({
+      url: baseUrl + "/save-and-restart",
+      method: 'post',
+      data: values
+    })
+    if (res.code !== reqSuccessCode) {
+      return
+    }
+    showSuccess("参数保存成功")
+  }
 
   async function handleExit() {
     let res = await service({
@@ -34,7 +33,7 @@ const Settings = () => {
       return
     }
     showSuccess("程序退出")
-  };
+  }
 
   async function handleRestart() {
     let res = await service({
@@ -46,28 +45,29 @@ const Settings = () => {
     showSuccess("重启成功")
   }
 
-  const handleAutoUpdate = () => {
-    // 自动更新的逻辑
-    axios.post('/api/auto-update')
-      .then(() => {
-        notification.success({message: '自动更新成功'});
-      })
-      .catch((error) => {
-        notification.error({message: '自动更新失败'});
-      });
-  };
+  async function handleAutoUpdate() {
+    let res = await service({
+      url: baseUrl + '/update-client',
+    })
+    if (res.code !== reqSuccessCode) {
+      return
+    }
+    showSuccess("自动升级成功")
+  }
 
-  const handleResetDefaults = () => {
-    // 恢复默认参数的逻辑
-    setLogLevel('Info');
-    setDataDirectory('');
-    setWebPort('');
-    notification.success({message: '已恢复默认参数'});
-  };
+  async function handleResetDefaults() {
+    let res = await service({
+      url: baseUrl + '/restore-default-param',
+    })
+    if (res.code !== reqSuccessCode) {
+      return
+    }
+    showSuccess("重置参数成功")
+  }
 
-  const onFinish = (values) => {
-    console.log('Received values from form: ', values);
-  };
+  async function onFinish(values) {
+    await handleSaveAndRestart(values)
+  }
 
   async function getLatestVersion() {
     let res = await service({
@@ -89,10 +89,21 @@ const Settings = () => {
     setCurrentVersion(res.result)
   }
 
+  async function getConfig() {
+    let res = await service({
+      url: baseUrl + '/get-config',
+    })
+    if (res.code !== reqSuccessCode) {
+      return
+    }
+    form.setFieldsValue(res.result)
+  }
+
   // 页面刚挂载的时候执行的函数
   useEffect(() => {
     getCurrentVersion()
     getLatestVersion()
+    getConfig()
   })
 
   return (
@@ -108,12 +119,13 @@ const Settings = () => {
       <h2>设置项</h2>
       <Form
         name="settings"
+        form={form}
         layout="vertical"
         onFinish={onFinish}
         initialValues={{
-          logLevel: 'Info',
-          dataDirectory: '',
-          webPort: '',
+          logLevel: 'Warning',
+          dataDir: 'data',
+          webPort: 3333,
         }}
       >
         <Form.Item
@@ -121,7 +133,7 @@ const Settings = () => {
           label="日志等级"
           rules={[{required: true, message: '请选择日志等级!'}]}
         >
-          <Select value={logLevel} onChange={setLogLevel}>
+          <Select>
             <Option value="Debug">Debug</Option>
             <Option value="Info">Info</Option>
             <Option value="Warning">Warning</Option>
@@ -129,21 +141,21 @@ const Settings = () => {
           </Select>
         </Form.Item>
         <Form.Item
-          name="dataDirectory"
+          name="dataDir"
           label="数据存放目录"
           rules={[{required: true, message: '请输入数据存放目录!'}]}
         >
-          <Input value={dataDirectory} onChange={(e) => setDataDirectory(e.target.value)}/>
+          <Input/>
         </Form.Item>
         <Form.Item
           name="webPort"
           label="web监听端口"
           rules={[{required: true, message: '请输入web监听端口!'}]}
         >
-          <Input value={webPort} onChange={(e) => setWebPort(e.target.value)}/>
+          <InputNumber/>
         </Form.Item>
         <Form.Item>
-          <Button type="primary" htmlType="submit" onClick={handleSaveAndRestart}>
+          <Button type="primary" htmlType="submit">
             保存参数并重启
           </Button>
         </Form.Item>

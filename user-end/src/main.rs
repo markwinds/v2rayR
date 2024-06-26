@@ -33,7 +33,7 @@ async fn main() -> std::io::Result<()> {
     // 打印堆栈信息
     env::set_var("RUST_BACKTRACE", "1");
 
-    set_log_level!(LogLevel::WarningLevel);
+    set_log_level!(LogLevel::Warning);
 
     #[cfg(not(debug_assertions))]
     open_web();
@@ -46,6 +46,8 @@ async fn main() -> std::io::Result<()> {
     }
 
     add_tray().unwrap();
+
+    log_w!("--------------------program start-------------------------");
 
     HttpServer::new(|| App::new()
         // 越往下越外层

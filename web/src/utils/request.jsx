@@ -89,8 +89,8 @@ service.interceptors.response.use(
       return response.data
     }
 
-    console.log("data", response.data)
-    showError(response.data.zh_msg === '' ? '未知错误' : response.data.zh_msg)
+    // console.log("data", response.data)
+    showError(response.data.zhMsg === '' ? '未知错误' : response.data.zhMsg)
 
     return response.data
   },

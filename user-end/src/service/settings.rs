@@ -5,36 +5,80 @@ use std::io::Write;
 use std::path::Path;
 use std::process::{Command, exit};
 
-use actix_web::{HttpResponse, Responder, web};
+use actix_web::{Responder, web};
+use serde::{Deserialize, Serialize};
 use tokio::time::{Duration, sleep};
 use uuid::Uuid;
 
 use crate::{conv_err, log_d, log_e, log_w, Logger, LogLevel, unwrap_res};
+use crate::config::Config;
 use crate::service::resp::{ApiError, ApiResponse};
 use crate::utils::extract_tar_gz;
 
 const GITHUB_OWNER: &str = "markwinds";
 const GITHUB_REPO: &str = "v2rayR";
 
+#[derive(Serialize, Deserialize, Debug)]
+#[serde(rename_all = "camelCase")]
+struct ConfigForm {
+    log_level: LogLevel,
+    data_dir: String,
+    web_port: u16,
+}
+
+impl ConfigForm {
+    fn config_to_form(config: &Config) -> ConfigForm {
+        let mut config_form = ConfigForm {
+            log_level: LogLevel::Debug,
+            data_dir: "".to_string(),
+            web_port: 0,
+        };
+        config_form.log_level = config.log_config.level;
+        config_form.data_dir = config.data_dir.to_string_lossy().into_owned();
+        config_form.web_port = config.web_port;
+        config_form
+    }
+
+    fn form_to_config(&self) -> Config {
+        let mut config = Config::default();
+        config.log_config.level = self.log_level;
+        config.data_dir = self.data_dir.parse().unwrap();
+        config.web_port = self.web_port;
+        config
+    }
+}
+
 pub fn init(cfg: &mut web::ServiceConfig) {
     cfg.service(
         web::scope("/settings")
-            .route("stop", web::get().to(stop_program))
-            .route("restart", web::get().to(restart_program))
-            .route("check-and-update", web::get().to(check_and_update))
-            .route("save-and-restart", web::post().to(save_and_reset))
-            .route("restore-default-param", web::post().to(restore_default_param))
             .route("latest-version", web::get().to(get_latest_version))
             .route("now-version", web::get().to(get_now_version_parse))
+            .route("get-config", web::get().to(get_config))
+            .route("stop", web::get().to(stop_program))
+            .route("restart", web::get().to(restart_program))
+            .route("update-client", web::get().to(check_and_update))
+            .route("save-and-restart", web::post().to(save_and_reset))
+            .route("restore-default-param", web::get().to(restore_default_param))
     );
 }
 
-async fn save_and_reset() -> impl Responder {
-    ""
+async fn get_config() -> impl Responder {
+    let config_ins = Config::instance();
+    let config = config_ins.lock().unwrap();
+    let config_form = ConfigForm::config_to_form(&*config);
+
+    ApiResponse::ok(config_form)
+}
+
+async fn save_and_reset(config_form: web::Json<ConfigForm>) -> impl Responder {
+    let config = config_form.form_to_config();
+    config.save_config();
+    restart_program().await
 }
 
 async fn restore_default_param() -> impl Responder {
-    ""
+    Config::restore_default_config();
+    restart_program().await
 }
 
 async fn get_latest_version() -> impl Responder {
