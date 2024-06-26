@@ -98,7 +98,7 @@ async fn stop_program() -> impl Responder {
     log_w!("stop program");
     tokio::spawn(async {
         sleep(Duration::from_secs(1)).await;
-        process::exit(0)
+        exit(0)
     });
     ApiResponse::ok("")
 }
