@@ -6,6 +6,7 @@ use std::process::Command;
 
 use chrono::{Datelike, Local, Timelike};
 use flate2::read::GzDecoder;
+use reqwest::{Client, Proxy, Response};
 use tar::Archive;
 
 use crate::{log_w, Logger, LogLevel};
@@ -88,8 +89,10 @@ pub fn extract_tar_gz(tar_gz_path: &str, output_dir: &str) -> io::Result<()> {
     Ok(())
 }
 
-struct HttpClient {
+pub struct HttpClient {
     proxy_url: String, // 使用代理的地址
+    client: Client,
+    user_agent: String, // 请求头带上的User-Agent字段，有些服务需要带上这个头才能正常响应
 }
 
 impl Default for HttpClient {
@@ -112,10 +115,25 @@ impl Default for HttpClient {
             }
         }
 
+        let client: Client;
+        if let Ok(client_proxy) = Proxy::all(&proxy) {
+            client = Client::builder().proxy(client_proxy).build().unwrap()
+        } else {
+            client = Client::builder().build().unwrap()
+        }
+
         HttpClient {
             proxy_url: proxy,
+            client,
+            user_agent: "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36".to_string(), // 模拟浏览器的头
         }
     }
 }
 
-impl HttpClient {}
+impl HttpClient {
+    pub async fn get(&self, url: &str) -> Result<Response, reqwest::Error> {
+        self.client.get(url)
+            .header("User-Agent", &self.user_agent)
+            .send().await
+    }
+}

@@ -14,7 +14,7 @@ use uuid::Uuid;
 use crate::{conv_err, log_d, log_e, log_w, Logger, LogLevel, unwrap_res};
 use crate::config::Config;
 use crate::service::resp::{ApiError, ApiResponse};
-use crate::utils::extract_tar_gz;
+use crate::utils::{extract_tar_gz, HttpClient};
 
 const GITHUB_OWNER: &str = "markwinds";
 const GITHUB_REPO: &str = "v2rayR";
@@ -212,7 +212,9 @@ async fn check_and_update() -> impl Responder {
             unwrap_res!(download_and_replace(github_owner,github_repo,&latest_version).await);
             log_w!("update from version:{} to {}", now_version, latest_version);
         }
-        _ => {}
+        _ => {
+            log_w!("no need update, nowVersion:{}  latestVersion:{}",now_version,latest_version)
+        }
     }
     ApiResponse::ok("ok")
 }
@@ -221,26 +223,11 @@ async fn check_and_update() -> impl Responder {
 async fn get_latest_release(owner: &str, repo: &str) -> Result<String, ApiError> {
     let url = format!("https://api.github.com/repos/{}/{}/releases/latest", owner, repo);
 
-    // 创建代理
-    let proxy = Proxy::all("http://127.0.0.1:10809").unwrap();
+    let http_client = HttpClient::default();
+    let resp = http_client.get(&url).await
+        .map_err(conv_err!(ApiError::GithubReqErr))?;
 
-    // 创建客户端并配置代理
-    let client = Client::builder()
-        .proxy(proxy)
-        .build().unwrap();
-
-    // // 发送 GET 请求
-    // let res = client.get("http://www.example.com")
-    //     .send()
-    //     .await?;
-
-
-    // let resp = reqwest::get(&url).await.map_err(conv_err!(ApiError::GithubReqErr))?;
-
-    let resp = client.get(&url).header("User-Agent", "MyRustClient/1.0").send().await.map_err(conv_err!(ApiError::GithubReqErr))?;
-
-
-    log_d!("resp:{:?}",resp);
+    // log_d!("resp:{:?}",resp);
     let json_resp = resp.json::<serde_json::Value>().await.map_err(conv_err!(ApiError::GithubReqErr))?;
 
     Ok(remove_leading_v(json_resp["tag_name"].as_str().unwrap()).await.to_string())
@@ -259,9 +246,16 @@ async fn remove_leading_v(input: &str) -> &str {
 async fn download_latest_version(owner: &str, repo: &str, version: &str, file_name: &str) -> Result<(), ApiError> {
     let url = format!("https://github.com/{}/{}/releases/download/{}/your_binary_name", owner, repo, version);
 
-    let response = reqwest::get(&url).await.map_err(conv_err!(ApiError::GithubReqErr))?;
-    let mut file = File::create(file_name).map_err(conv_err!(ApiError::CreateFileErr))?;
-    let content = response.bytes().await.map_err(conv_err!(ApiError::CreateFileErr))?;
+    let http_client = HttpClient::default();
+    let response = http_client.get(&url).await
+        .map_err(conv_err!(ApiError::GithubReqErr))?;
+
+    let mut file = File::create(file_name)
+        .map_err(conv_err!(ApiError::CreateFileErr))?;
+
+    let content = response.bytes().await
+        .map_err(conv_err!(ApiError::CreateFileErr))?;
+
     file.write_all(&content).map_err(conv_err!(ApiError::CreateFileErr))?;
     Ok(())
 }
@@ -279,7 +273,8 @@ async fn download_and_replace(owner: &str, repo: &str, version: &str) -> Result<
     let old_client_name = format!(".{}", client_name);
 
     // 重命名客户端
-    fs::rename(&client_name, &old_client_name).map_err(conv_err!(ApiError::RenameFileErr))?;
+    fs::rename(&client_name, &old_client_name)
+        .map_err(conv_err!(ApiError::RenameFileErr))?;
 
     // 解压最新的程序 并删除压缩包
     extract_tar_gz(file_name, &client_name).map_err(conv_err!(ApiError::ExtFileErr))?;

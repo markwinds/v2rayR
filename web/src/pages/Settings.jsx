@@ -160,7 +160,7 @@ const Settings = () => {
           label="代理"
           rules={[{required: false, message: '软件使用的代理!'}]}
         >
-          <Input/>
+          <Input placeholder="示例：http://127.0.0.1:1080,不填写将使用环境变量HTTP_PROXY、HTTPS_PROXY"/>
         </Form.Item>
         <Form.Item>
           <Button type="primary" htmlType="submit">
@@ -178,7 +178,7 @@ const Settings = () => {
         重启程序
       </Button>
       <Button type="default" onClick={handleResetDefaults}>
-        恢复默认参数
+        恢复默认参数并重启
       </Button>
     </div>
   );
