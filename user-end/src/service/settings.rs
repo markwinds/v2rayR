@@ -6,7 +6,7 @@ use std::path::Path;
 use std::process::{Command, exit};
 
 use actix_web::{Responder, web};
-use reqwest::{Client, Proxy};
+use reqwest::{Client, Proxy, StatusCode};
 use serde::{Deserialize, Serialize};
 use tokio::time::{Duration, sleep};
 use uuid::Uuid;
@@ -244,11 +244,17 @@ async fn remove_leading_v(input: &str) -> &str {
 }
 
 async fn download_latest_version(owner: &str, repo: &str, version: &str, file_name: &str) -> Result<(), ApiError> {
-    let url = format!("https://github.com/{}/{}/releases/download/{}/your_binary_name", owner, repo, version);
+    log_d!("start download latest client");
+    let url = format!("https://github.com/{}/{}/releases/download/v{}/{}", owner, repo, version, file_name);
 
     let http_client = HttpClient::default();
     let response = http_client.get(&url).await
         .map_err(conv_err!(ApiError::GithubReqErr))?;
+
+    if response.status() != StatusCode::OK {
+        log_e!("github resp:{:?}",response);
+        return Err(ApiError::GithubReqErr("status code err".to_string()));
+    }
 
     let mut file = File::create(file_name)
         .map_err(conv_err!(ApiError::CreateFileErr))?;
@@ -257,6 +263,8 @@ async fn download_latest_version(owner: &str, repo: &str, version: &str, file_na
         .map_err(conv_err!(ApiError::CreateFileErr))?;
 
     file.write_all(&content).map_err(conv_err!(ApiError::CreateFileErr))?;
+
+    log_d!("download latest client ok");
     Ok(())
 }
 
@@ -267,17 +275,20 @@ async fn download_and_replace(owner: &str, repo: &str, version: &str) -> Result<
 
     // 获取当前程序的名称
     let args: Vec<String> = env::args().collect();
+    let program_path = Path::new(&args[0]).parent().unwrap_or("".as_ref());
     let client_name = Path::new(&args[0]).file_name().unwrap().to_str().unwrap().to_string();
 
     // 构建旧客户端名称
     let old_client_name = format!(".{}", client_name);
+    let client_path = program_path.join(&client_name);
+    let old_client_path = program_path.join(&old_client_name);
 
     // 重命名客户端
-    fs::rename(&client_name, &old_client_name)
+    fs::rename(&client_path, &old_client_path)
         .map_err(conv_err!(ApiError::RenameFileErr))?;
 
     // 解压最新的程序 并删除压缩包
-    extract_tar_gz(file_name, &client_name).map_err(conv_err!(ApiError::ExtFileErr))?;
+    extract_tar_gz(Path::new(&file_name), &*client_path).map_err(conv_err!(ApiError::ExtFileErr))?;
     fs::remove_file(file_name).unwrap();
 
     // 如果是linux系统 为文件添加执行权限
@@ -285,7 +296,7 @@ async fn download_and_replace(owner: &str, repo: &str, version: &str) -> Result<
     {
         Command::new("chmod")
             .arg("+x")
-            .arg(client_name)
+            .arg(&client_path)
     }
 
     tokio::spawn(async move {
@@ -293,11 +304,11 @@ async fn download_and_replace(owner: &str, repo: &str, version: &str) -> Result<
         // 删除旧程序
         #[cfg(target_os = "windows")]
         {
-            cmd.push_str(&format!("del {}*", old_client_name))
+            cmd.push_str(&format!("del {:?}*", old_client_path))
         }
         #[cfg(target_os = "linux")]
         {
-            cmd.push_str(&format!("rm {}*", old_client_name))
+            cmd.push_str(&format!("rm {:?}*", old_client_path))
         }
         run_cmd_in_new_process(&cmd, 2).await; // 两秒后删除老程序文件（需要等程序退出后再删除，所以要延时）
         start_program_delay(4).await; // 4秒后重启拉起新的程序

@@ -2,6 +2,7 @@ use std::{env, io};
 use std::env::VarError;
 use std::fs::File;
 use std::io::BufReader;
+use std::path::Path;
 use std::process::Command;
 
 use chrono::{Datelike, Local, Timelike};
@@ -77,7 +78,7 @@ pub fn open_web() {
     }
 }
 
-pub fn extract_tar_gz(tar_gz_path: &str, output_dir: &str) -> io::Result<()> {
+pub fn extract_tar_gz(tar_gz_path: &Path, output_dir: &Path) -> io::Result<()> {
     // 打开 .tar.gz 文件
     let tar_gz = File::open(tar_gz_path)?;
     // 创建 GzDecoder 以解压 gzip 部分
